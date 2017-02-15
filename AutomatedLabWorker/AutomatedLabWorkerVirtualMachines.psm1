@@ -984,6 +984,8 @@ workflow Checkpoint-LWHypervVM
         {
             foreach -parallel -ThrottleLimit 20 ($n in $ComputerName)
             {
+				$lvm = Get-LabVm -ComputerName $n
+				if($lvm.FriendlyName){$n = $lvm.FriendlyName}
                 if ((Get-VM -Name $n -ErrorAction SilentlyContinue).State -eq 'Running')
                 {
                     Suspend-VM -Name $n -ErrorAction SilentlyContinue
@@ -999,6 +1001,8 @@ workflow Checkpoint-LWHypervVM
         
         foreach -parallel -ThrottleLimit 20 ($n in $ComputerName)
         {
+			$lvm = Get-LabVm -ComputerName $n
+			if($lvm.FriendlyName){$n = $lvm.FriendlyName}
             Checkpoint-VM -Name $n -SnapshotName $SnapshotName
         }
         
@@ -1009,6 +1013,8 @@ workflow Checkpoint-LWHypervVM
             
             foreach -parallel -ThrottleLimit 20 ($n in $ComputerName)
             {
+				$lvm = Get-LabVm -ComputerName $n
+				if($lvm.FriendlyName){$n = $lvm.FriendlyName}
                 if ($n -in $WORKFLOW:runningMachines)
                 {
                     Write-Verbose -Message "Machine '$n' was running, starting it."
@@ -1329,15 +1335,24 @@ function Dismount-LWIsoImage
 
     foreach ($machine in $machines)
     {
+		if($machine.FriendlyName)
+		{
+			$VmName = $machine.FriendlyName
+		}
+		else
+		{
+			$VmName = $Machine.Name
+		}
+		}
         if ($machine.OperatingSystem.Version -ge [System.Version]'6.2')
         {
             Write-Verbose -Message "Removing DVD drive for machine '$machine'"
-            Get-VMDvdDrive -VMName $machine | Remove-VMDvdDrive
+            Get-VMDvdDrive -VMName $VmName | Remove-VMDvdDrive
         }
         else
         {
             Write-Verbose -Message "Setting DVD drive for machine '$machine' to null"
-            Get-VMDvdDrive -VMName $machine | Set-VMDvdDrive -Path $null
+            Get-VMDvdDrive -VMName $VmName | Set-VMDvdDrive -Path $null
         }
     }
 }
@@ -1476,6 +1491,9 @@ function Get-LWHypervVMDescription
     )
     
     Write-LogFunctionEntry
+
+	$friendlyName = (Get-LabMachine).FriendlyName
+	if($friendlyName){$ComputerName = $friendlyName}
     
     $vm = Get-VM -Name $ComputerName -ErrorAction SilentlyContinue
     if (-not $vm)

@@ -1741,7 +1741,9 @@ function Add-LabMachineDefinition
         [ValidateSet('Basic_A0 (1 Cores, 768 Mb, 1 max data disks)', 'Basic_A1 (1 Cores, 1792 Mb, 2 max data disks)', 'Basic_A2 (2 Cores, 3584 Mb, 4 max data disks)', 'Basic_A3 (4 Cores, 7168 Mb, 8 max data disks)', 'Basic_A4 (8 Cores, 14336 Mb, 16 max data disks)', 'Standard_A0 (1 Cores, 768 Mb, 1 max data disks)', 'Standard_A1 (1 Cores, 1792 Mb, 2 max data disks)', 'Standard_A1_v2 (1 Cores, 2048 Mb, 2 max data disks)', 'Standard_A2 (2 Cores, 3584 Mb, 4 max data disks)', 'Standard_A2_v2 (2 Cores, 4096 Mb, 4 max data disks)', 'Standard_A2m_v2 (2 Cores, 16384 Mb, 4 max data disks)', 'Standard_A3 (4 Cores, 7168 Mb, 8 max data disks)', 'Standard_A4 (8 Cores, 14336 Mb, 16 max data disks)', 'Standard_A4_v2 (4 Cores, 8192 Mb, 8 max data disks)', 'Standard_A4m_v2 (4 Cores, 32768 Mb, 8 max data disks)', 'Standard_A5 (2 Cores, 14336 Mb, 4 max data disks)', 'Standard_A6 (4 Cores, 28672 Mb, 8 max data disks)', 'Standard_A7 (8 Cores, 57344 Mb, 16 max data disks)', 'Standard_A8_v2 (8 Cores, 16384 Mb, 16 max data disks)', 'Standard_A8m_v2 (8 Cores, 65536 Mb, 16 max data disks)', 'Standard_D1 (1 Cores, 3584 Mb, 2 max data disks)', 'Standard_D1_v2 (1 Cores, 3584 Mb, 2 max data disks)', 'Standard_D11 (2 Cores, 14336 Mb, 4 max data disks)', 'Standard_D11_v2 (2 Cores, 14336 Mb, 4 max data disks)', 'Standard_D12 (4 Cores, 28672 Mb, 8 max data disks)', 'Standard_D12_v2 (4 Cores, 28672 Mb, 8 max data disks)', 'Standard_D13 (8 Cores, 57344 Mb, 16 max data disks)', 'Standard_D13_v2 (8 Cores, 57344 Mb, 16 max data disks)', 'Standard_D14 (16 Cores, 114688 Mb, 32 max data disks)', 'Standard_D14_v2 (16 Cores, 114688 Mb, 32 max data disks)', 'Standard_D15_v2 (20 Cores, 143360 Mb, 40 max data disks)', 'Standard_D2 (2 Cores, 7168 Mb, 4 max data disks)', 'Standard_D2_v2 (2 Cores, 7168 Mb, 4 max data disks)', 'Standard_D3 (4 Cores, 14336 Mb, 8 max data disks)', 'Standard_D3_v2 (4 Cores, 14336 Mb, 8 max data disks)', 'Standard_D4 (8 Cores, 28672 Mb, 16 max data disks)', 'Standard_D4_v2 (8 Cores, 28672 Mb, 16 max data disks)', 'Standard_D5_v2 (16 Cores, 57344 Mb, 32 max data disks)', 'Standard_DS1 (1 Cores, 3584 Mb, 2 max data disks)', 'Standard_DS1_v2 (1 Cores, 3584 Mb, 2 max data disks)', 'Standard_DS11 (2 Cores, 14336 Mb, 4 max data disks)', 'Standard_DS11_v2 (2 Cores, 14336 Mb, 4 max data disks)', 'Standard_DS12 (4 Cores, 28672 Mb, 8 max data disks)', 'Standard_DS12_v2 (4 Cores, 28672 Mb, 8 max data disks)', 'Standard_DS13 (8 Cores, 57344 Mb, 16 max data disks)', 'Standard_DS13_v2 (8 Cores, 57344 Mb, 16 max data disks)', 'Standard_DS14 (16 Cores, 114688 Mb, 32 max data disks)', 'Standard_DS14_v2 (16 Cores, 114688 Mb, 32 max data disks)', 'Standard_DS15_v2 (20 Cores, 143360 Mb, 40 max data disks)', 'Standard_DS2 (2 Cores, 7168 Mb, 4 max data disks)', 'Standard_DS2_v2 (2 Cores, 7168 Mb, 4 max data disks)', 'Standard_DS3 (4 Cores, 14336 Mb, 8 max data disks)', 'Standard_DS3_v2 (4 Cores, 14336 Mb, 8 max data disks)', 'Standard_DS4 (8 Cores, 28672 Mb, 16 max data disks)', 'Standard_DS4_v2 (8 Cores, 28672 Mb, 16 max data disks)', 'Standard_DS5_v2 (16 Cores, 57344 Mb, 32 max data disks)', 'Standard_F1 (1 Cores, 2048 Mb, 2 max data disks)', 'Standard_F16 (16 Cores, 32768 Mb, 32 max data disks)', 'Standard_F16s (16 Cores, 32768 Mb, 32 max data disks)', 'Standard_F1s (1 Cores, 2048 Mb, 2 max data disks)', 'Standard_F2 (2 Cores, 4096 Mb, 4 max data disks)', 'Standard_F2s (2 Cores, 4096 Mb, 4 max data disks)', 'Standard_F4 (4 Cores, 8192 Mb, 8 max data disks)', 'Standard_F4s (4 Cores, 8192 Mb, 8 max data disks)', 'Standard_F8 (8 Cores, 16384 Mb, 16 max data disks)', 'Standard_F8s (8 Cores, 16384 Mb, 16 max data disks)')]
         [string]$AzureRoleSize,
 
-        [switch]$PassThru
+        [switch]$PassThru,
+
+		[string]$FriendlyName
     )
     
     Write-LogFunctionEntry
@@ -1844,6 +1846,11 @@ function Add-LabMachineDefinition
 		$machine.LoadBalancerWinRmHttpPort = $script:lab.AzureSettings.LoadBalancerPortCounter
 		$script:lab.AzureSettings.LoadBalancerPortCounter++
 		$machine.LoadBalancerWinrmHttpsPort = $script:lab.AzureSettings.LoadBalancerPortCounter	
+	}
+
+	if($FriendlyName)
+	{
+		$machine.FriendlyName = $FriendlyName
 	}
     
     if ($InstallationUserCredential)
