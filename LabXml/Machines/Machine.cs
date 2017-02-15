@@ -44,6 +44,7 @@ namespace AutomatedLab
         public int LoadBalancerRdpPort { get; set; }
         public int LoadBalancerWinRmHttpPort { get; set; }
         public int LoadBalancerWinrmHttpsPort { get; set; }
+        public string FriendlyName { get; set; }
 
 
         public int Processors
