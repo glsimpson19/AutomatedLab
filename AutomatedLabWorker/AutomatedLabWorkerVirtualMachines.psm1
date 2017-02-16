@@ -27,7 +27,7 @@ function New-LWHypervVM
 
     $script:lab = Get-Lab
     
-    if (Get-VM -Name $Machine.Name -ErrorAction SilentlyContinue)
+    if ((Get-VM -Name $Machine.Name -ErrorAction SilentlyContinue) -or (Get-VM -Name $Machine.FriendlyName -ErrorAction SilentlyContinue))
     {
         Write-ProgressIndicatorEnd
         Write-ScreenInfo -Message "The machine '$Machine' does already exist" -Type Warning
@@ -514,13 +514,24 @@ Windows Registry Editor Version 5.00
 function Remove-LWHypervVM
 {
     Param (
-        [Parameter(Mandatory)]
-        [string]$Name
+        [Parameter(Mandatory, ParameterSetName = 'ByName')]
+        [string]$Name,
+
+		[Parameter(Mandatory, ParameterSetName = 'ByFriendlyName')]
+		[string]$FriendlyName
     )
     
     Write-LogFunctionEntry
     
-    $vm = Get-VM -Name $Name -ErrorAction SilentlyContinue
+	if($FriendlyName)
+	{
+		$vm = Get-VM -Name $FriendlyName -ErrorAction SilentlyContinue
+	}
+	else
+	{
+		$vm = Get-VM -Name $Name -ErrorAction SilentlyContinue
+	}
+
     if ($vm)
     {
         $vmPath = Split-Path -Path $vm.HardDrives[0].Path -Parent
