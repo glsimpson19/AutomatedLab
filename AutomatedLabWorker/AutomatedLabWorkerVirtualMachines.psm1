@@ -1343,7 +1343,7 @@ function Dismount-LWIsoImage
 		{
 			$VmName = $Machine.Name
 		}
-		}
+		
         if ($machine.OperatingSystem.Version -ge [System.Version]'6.2')
         {
             Write-Verbose -Message "Removing DVD drive for machine '$machine'"

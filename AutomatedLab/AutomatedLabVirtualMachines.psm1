@@ -142,6 +142,9 @@ function Start-LabVM
     param (
         [Parameter(ParameterSetName = 'ByName', Position = 0)]
         [string[]]$ComputerName,
+
+		[Parameter(ParameterSetName = 'ByFriendlyName', Position = 0)]
+        [string[]]$FriendlyName,
         
         [Parameter(Mandatory, ParameterSetName = 'ByRole')]
         [AutomatedLab.Roles]$RoleName,
@@ -198,6 +201,10 @@ function Start-LabVM
         if ($PSCmdlet.ParameterSetName -eq 'ByName' -and -not $StartNextMachines -and -not $StartNextDomainControllers)
         {
             $vms = Get-LabMachine -ComputerName $ComputerName
+        }
+		if ($PSCmdlet.ParameterSetName -eq 'ByFriendlyName' -and -not $StartNextMachines -and -not $StartNextDomainControllers)
+        {
+            $vms = Get-LabMachine -FriendlyName $FriendlyName
         }
         elseif ($PSCmdlet.ParameterSetName -eq 'ByRole' -and -not $StartNextMachines -and -not $StartNextDomainControllers)
         {
@@ -353,6 +360,9 @@ function Save-LabVM
     param (
         [Parameter(Mandatory, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'ByName', Position = 0)]
         [string[]]$Name,
+
+		[Parameter(Mandatory, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'ByFriendlyName', Position = 0)]
+        [string[]]$FriendlyName,
         
         [Parameter(Mandatory, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'ByRole')]
         [AutomatedLab.Roles]$RoleName,
@@ -368,7 +378,7 @@ function Save-LabVM
         $lab = Get-Lab
         
         $vms = @()
-        $availableVMs = $lab.Machines.Name
+        $availableVMs = $lab.Machines
     }
     
     process
@@ -385,7 +395,16 @@ function Save-LabVM
         if ($PSCmdlet.ParameterSetName -eq 'ByName')
         {
             $Name | ForEach-Object {
-                if ($_ -in $availableVMs)
+                if ($_ -in $availableVMs.Name)
+                {
+                    $vms += $_
+                }
+            }
+        }
+		elseif ($PSCmdlet.ParameterSetName -eq 'ByFriendlyName')
+        {
+            $FriendlyName | ForEach-Object {
+                if ($_ -in $availableVMs.FriendlyName)
                 {
                     $vms += $_
                 }
@@ -497,6 +516,9 @@ function Stop-LabVM
     param (
         [Parameter(Mandatory, ParameterSetName = 'ByName', Position = 0)]
         [string[]]$ComputerName,
+
+		[Parameter(Mandatory, ParameterSetName = 'ByFriendlyName', Position = 0)]
+        [string[]]$FriendlyName,
         
         [double]$ShutdownTimeoutInMinutes = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData.Timeout_StopLabMachine_Shutdown,
 
@@ -522,6 +544,10 @@ function Stop-LabVM
     if ($ComputerName)
     {
         $machines = Get-LabMachine -ComputerName $ComputerName
+    }
+	elseif ($FriendlyName)
+    {
+        $machines = Get-LabMachine -FriendlyName $FriendlyName
     }
     elseif ($All)
     {
@@ -612,8 +638,11 @@ function Wait-LabVM
 {
     # .ExternalHelp AutomatedLab.Help.xml
     param (
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = 'ByName')]
         [string[]]$ComputerName,
+
+		[Parameter(Mandatory, Position = 0, ParameterSetName = 'ByFriendlyName')]
+        [string[]]$FriendlyName,
         
         [double]$TimeoutInMinutes = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData.Timeout_WaitLabMachine_Online,
 
@@ -643,7 +672,14 @@ function Wait-LabVM
     
     process
     {
-        $vms = Get-LabMachine -ComputerName $ComputerName
+		if($FriendlyName)
+		{
+			$vms = Get-LabMachine -FriendlyName $FriendlyName
+		}
+		else
+		{
+			$vms = Get-LabMachine -ComputerName $ComputerName
+		}
         
         foreach ($vm in $vms)
         {
@@ -745,12 +781,16 @@ function Wait-LabVM
 }
 #endregion Wait-LabVM
 
+#region Wait-LabVmRestart
 function Wait-LabVMRestart
 {
     # .ExternalHelp AutomatedLab.Help.xml
     param (
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = 'ByName')]
         [string[]]$ComputerName,
+
+		[Parameter(Mandatory, Position = 0, ParameterSetName = 'ByFriendlyName')]
+        [string[]]$FriendlyName,
         
         [double]$TimeoutInMinutes = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData.Timeout_WaitLabMachine_Online,
         
@@ -773,7 +813,14 @@ function Wait-LabVMRestart
         return
     }
     
-    $vms = Get-LabMachine -ComputerName $ComputerName
+    if($FriendlyName)
+	{
+		$vms = Get-LabMachine -FriendlyName $FriendlyName
+	}
+	else
+	{
+		$vms = Get-LabMachine -ComputerName $ComputerName
+	}
     
     $azureVms = $vms | Where-Object HostType -eq 'Azure'
     $hypervVms = $vms | Where-Object HostType -eq 'HyperV'
@@ -806,8 +853,11 @@ function Wait-LabVMShutdown
 {
     # .ExternalHelp AutomatedLab.Help.xml
     param (
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = 'ByName')]
         [string[]]$ComputerName,
+
+		[Parameter(Mandatory, Position = 0, ParameterSetName = 'ByFriendlyName')]
+        [string[]]$FriendlyName,
         
         [double]$TimeoutInMinutes = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData.Timeout_WaitLabMachine_Online
     )
@@ -822,7 +872,14 @@ function Wait-LabVMShutdown
         return
     }
     
-    $vms = Get-LabMachine -ComputerName $ComputerName
+     if($FriendlyName)
+	 {
+	 	$vms = Get-LabMachine -FriendlyName $FriendlyName
+	 }
+	 else
+	 {
+	 	$vms = Get-LabMachine -ComputerName $ComputerName
+	 }
     
     $vms | Add-Member -Name HasShutdown -MemberType NoteProperty -Value $false -Force
     
@@ -864,7 +921,10 @@ function Remove-LabVM
     param (
         [Parameter(Mandatory, ParameterSetName = 'ByName', Position = 0)]
         [string[]]$Name,
-        
+
+		[Parameter(Mandatory, ParameterSetName = 'ByFriendlyName', Positioin = 0)]
+        [string[]]$FriendlyName,
+
         [Parameter(ParameterSetName = 'All')]
         [switch]$All
     )
@@ -882,6 +942,10 @@ function Remove-LabVM
     {
         $machines = $lab.Machines | Where-Object Name -in $Name
     }
+	elseif($FriendlyName)
+	{
+		$machines = $lab.Machines | Where-Object FriendlyName -In $FriendlyName
+	}
     else
     {
         $machines = $lab.Machines
@@ -901,13 +965,6 @@ function Remove-LabVM
         {
             $computerName = (Get-HostEntry -Hostname $machine).IpAddress.IpAddressToString
         }
-       
-        <#
-                removed 161023, might not be required
-                if ((Get-LabVMStatus -ComputerName $machine) -eq 'Unknown')
-                {
-                Start-LabVM -ComputerName $machines -Wait
-        }#>
         
         Get-PSSession | Where-Object {$_.ComputerName -eq $computerName} | Remove-PSSession
         
@@ -948,7 +1005,11 @@ function Get-LabVMStatus
     [cmdletBinding()]
     # .ExternalHelp AutomatedLab.Help.xml
     param (
+		[Parameter(ParameterSetName = 'ByName')]
         [string[]]$ComputerName,
+
+		[Parameter(ParameterSetName = 'ByFriendlyName')]
+		[string[]]$FriendlyName,
 
         [switch]$AsHashTable
     )
@@ -968,7 +1029,17 @@ function Get-LabVMStatus
     }
     
     $hypervVMs = $vms | Where-Object HostType -eq 'HyperV'
-    if ($hypervVMs) { $hypervStatus = Get-LWHypervVMStatus -ComputerName $hypervVMs.Name }
+    if ($hypervVMs) {
+		if($PSCmdlet.ParameterSetName -eq 'FriendlyName')
+		{
+			$machineNames = $hypervVMs.FriendlyName
+		}
+		else
+		{
+			$machineNames = $hypervVMs.Name
+		}
+		$hypervStatus = Get-LWHypervVMStatus -ComputerName $machineNames
+	}
     
     $azureVMs = $vms | Where-Object HostType -eq 'Azure'
     if ($azureVMs) { $azureStatus = Get-LWAzureVMStatus -ComputerName $azureVMs.Name }
@@ -1540,6 +1611,9 @@ function Get-LabVM
         
         [Parameter(Mandatory, ParameterSetName = 'All')]
         [switch]$All,
+
+		[Parameter(Mandatory, ParameterSetName = 'FriendlyName')]
+		[string[]]$FriendlyName,
         
         [switch]$IsRunning
     )
@@ -1592,6 +1666,20 @@ function Get-LabVM
                 return
             }
         }
+
+		if($PSCmdlet.ParameterSetName -eq 'FriendlyName')
+		{
+			foreach($fName in $FriendlyName)
+			{
+				$result = $Script:data.Machines |
+				Where-Object -Property FriendlyName -EQ $fName
+
+				if(-not $result)
+				{
+					return
+				}
+			}
+		}
         
         if ($PSCmdlet.ParameterSetName -eq 'All')
         {
